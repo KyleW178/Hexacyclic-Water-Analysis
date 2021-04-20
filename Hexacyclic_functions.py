@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Apr 17 23:32:55 2021
-
-@author: Haworth_Lab2
 """
 
 import os,math,csv,pytz,itertools
@@ -44,21 +42,20 @@ def OO_Clash(c1,c2,crit = 4):
     else:
         return False
 
-#Why this falloff design doesnot work???
-#def HP_HB_Interaction(coo1,coo2,crit):
-#    distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
-#    falloff = 0.7
-#    if (crit - falloff)<= distance <= (crit + falloff):#HP crit 3.5, HB crit 3
-#        return str(round(distance, 3))
-#    else:
-#        return False
 
-def HP_HB_Interaction(coo1,coo2,crit):
+def HP_HB_Interaction(coo1,coo2,crit,falloff):#For crit =3.5(HP), falloff 0.7. Crit 3.0(HB), falloff 0.5 or other values of the same ratio
     distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
-    if distance <= crit:#HP crit 3.5, HB crit 3
+    if (crit - falloff)<= distance <= (crit + falloff):#HP crit 3.5, HB crit 3
         return str(round(distance, 3))
     else:
         return False
+
+#def HP_HB_Interaction(coo1,coo2,crit):
+#    distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
+#    if distance <= crit:#HP crit 3.5, HB crit 3
+#        return str(round(distance, 3))
+#    else:
+#        return False
 
 #Name: N01, O04, so on
 #Please make a new one... this does not work
@@ -134,7 +131,7 @@ def permutation(limitations:list,change_range:dict):#lim_idx:[start,end]
         
 
     
-def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,HP_lim_ep = 7, Wat_HB_lim = 3, HP_Crit = 3.5, HB_Crit = 3):
+def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,HP_lim_ep = 7, Wat_HB_lim = 3, HP_Crit = 3.5, HB_Crit = 3,HP_Falloff = 0.8, HB_Falloff = 0.6):
     #HB_atm_pair and CA_list stored within a class    
     for file in os.listdir(sub_folder):
         if file.endswith(keyword) and 'Prot' not in file:
@@ -148,7 +145,7 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
                     try:
                         residue[split[2]] = [float(split[6]),float(split[7]),float(split[8])]
                     except:
-#                        print('Error occurred at {}. \n Line as shown: {}'.format(file, atm))
+                        print('Error occurred at {}. \n Line as shown: {}'.format(file, atm))
                         pass
             
             #print(residue)
@@ -167,8 +164,8 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
             for atm in AliP_C:
                 HP[atm] = []
                 for keys in wat.keys():
-                    if HP_HB_Interaction(residue[atm],wat[keys],HP_Crit):
-                        HP[atm].extend([keys, HP_HB_Interaction(residue[atm],wat[keys],HP_Crit)])
+                    if HP_HB_Interaction(residue[atm],wat[keys],HP_Crit, HP_Falloff):
+                        HP[atm].extend([keys, HP_HB_Interaction(residue[atm],wat[keys],HP_Crit,HP_Falloff)])
                 if HP[atm] == []:
                     del HP[atm]
                 
@@ -179,25 +176,28 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
             for l in range(0,len(HB_atm) -1):
                 Intra_HB[HB_atm[l]] = []
                 for n in range(l+1, len(HB_atm)):
-                    
-                    if HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit):
-                        Intra_Crit = Intra_HB_Crit(HB_atm[l],HB_atm[n])
+                    Intra_Crit = Intra_HB_Crit(HB_atm[l],HB_atm[n])
+                    if  Intra_Crit == '0':
+                        if OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]]):
+                                O_clash[HB_atm[l]] = [HB_atm[n],OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]])]
+                        continue
+                    if HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,HB_Falloff):
+                        
                         if  Intra_Crit == 'x':#l is N, n can be both
                             try:
                                 vec_1 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[l]])
                             
                                 vec_2 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[n]])
                             
-                                Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit),Intra_HB_Geo(vec_1,vec_2)])
+                                Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,,HB_Falloff),Intra_HB_Geo(vec_1,vec_2)])
                             except:
                                 print('Problem occurred with fetching intra HB!\n')
 #                        #l is O, n is N
                         elif  Intra_Crit == '2':
                             vec1 = np.array(residue[struc.HB_pair[HB_atm[n]]])-np.array(residue[HB_atm[n]])
                             vec2 = np.array(residue[struc.HB_pair[HB_atm[n]]])-np.array(residue[HB_atm[l]])
-                            Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit),Intra_HB_Geo(vec1,vec2)]) 
-                        elif  Intra_Crit == '0':
-                            O_clash[HB_atm[l]] = [HB_atm[n],OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]])]       
+                            Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,,HB_Falloff),Intra_HB_Geo(vec1,vec2)]) 
+                        
     #                            except:
 #                                print('Error at {} and {}'.format(HB_atm[l],HB_atm[n]))
                 if Intra_HB[HB_atm[l]] == []:
@@ -209,8 +209,8 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
             for atm in HB_atm:
                 Wat_HB[atm] = []
                 for keys in wat.keys():
-                    if HP_HB_Interaction(residue[atm],wat[keys],HB_Crit):
-                        Wat_HB[atm].extend([keys, HP_HB_Interaction(residue[atm],wat[keys],HB_Crit)])
+                    if HP_HB_Interaction(residue[atm],wat[keys],HB_Crit,HB_Falloff):
+                        Wat_HB[atm].extend([keys, HP_HB_Interaction(residue[atm],wat[keys],HB_Crit,HB_Falloff)])
                 if Wat_HB[atm] == []:
                     del Wat_HB[atm]
             
