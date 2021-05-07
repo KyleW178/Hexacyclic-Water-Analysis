@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Apr 17 23:32:55 2021
+
+@author: Haworth_Lab2
 """
 
 import os,math,csv,pytz,itertools
 import numpy as np
-import matplotlib.pyplot as plt
-import datetime
+from matplotlib import pyplot as PLT
+from matplotlib import cm as CM
+import seaborn as sns
         
 class HP_Interaction():
     def __init__(self):
@@ -35,7 +38,15 @@ def get_num(atm:str):
             num+= alp
     return int(num)
 
-def OO_Clash(c1,c2,crit = 4):
+def get_str(atm:str):
+    string = ''
+    for alp in atm:
+        if alp.isalpha():
+            string+= alp
+    return string
+
+
+def OO_Clash(c1,c2,crit = 3.5):
     distance = math.sqrt((c1[0]-c2[0])**2 + (c1[1]-c2[1])**2 + (c1[2]-c2[2])**2)
     if distance < crit:
         return str(round(distance, 3))
@@ -58,7 +69,6 @@ def HP_HB_Interaction(coo1,coo2,crit,falloff):#For crit =3.5(HP), falloff 0.7. C
 #        return False
 
 #Name: N01, O04, so on
-#Please make a new one... this does not work
 #Consider: regular+ O-O clash(return 0)
 def Intra_HB_Crit(name1, name2, aa = 6):
     a, b = get_num(name1), get_num(name2)
@@ -67,7 +77,7 @@ def Intra_HB_Crit(name1, name2, aa = 6):
             return '0'
         else:
             if name1[0] == 'N':
-                return 'x'
+                return '1'
             if name1[0] == 'O':
                 return '2'
     else:
@@ -81,13 +91,98 @@ def Intra_HB_Geo(vec1,vec2, limit= 45):
     unit2 = vec2 / np.linalg.norm(vec2)
     ang = math.degrees(np.arccos(np.clip(np.dot(unit1, unit2), -1.0, 1.0)))
     final = round(min(ang,(180-ang)),2)
-    #print('Angle is:',ang)
+
     if  final > limit:
         return 'NG'
     else:
         return final
-    
 
+def retrieve_key(data:dict,compare):
+    for keys, values in data.items():
+        if values == compare:
+            break
+    return keys
+
+#    
+#def trace_rename_atm(pre_PDB:str,solv_PDB:str):
+#    OrigLines = open(pre_PDB,'r').readlines()
+#    
+#    with open(pre_PDB) as f:
+#        for index, l in enumerate(f):
+#            pass
+#    index = index + 1
+#    
+#    HB_atm, NH,CO = {} , {}, {} 
+#    Alip_C_BB, Alip_C_Exp = {} , {}
+#    
+#    HB_atm_pair = {}#Gotta figure this one out
+#    
+#    for atm in OrigLines:
+#        split = atm.split()
+#        if get_str(split[2]) in ['O' ,'N']: #We don't consider other O or N in this case
+#            HB_atm[split[2]] = [split[6],split[7],split[8]]
+#            HB_atm_pair[split[2]] = 'NaN'#Indicate which residue 
+#        elif split[2][0] == 'C':
+#            if get_str(split[2]) == 'C':
+#                CO[split[2]] = [split[6],split[7],split[8]]
+#            elif get_str(split[2]) == 'CA':
+#                Alip_C_BB[split[2]] = [split[6],split[7],split[8]]
+#            else:
+#                Alip_C_Exp[split[2]] = [split[6],split[7],split[8]]
+#        elif split[2][0] == 'H':
+#            NH[split[2]] = [split[6],split[7],split[8]]
+#    
+#    #Update HB_atm pairs
+#    for key in HB_atm.keys():
+#        if get_str(key) == 'O':#Assume we don't get any hydroxyl or amine right now
+#            for Ckey in CO.keys():
+#                if get_num(Ckey) == get_num(key):
+#                    HB_atm_pair[key] = Ckey
+#                    break
+#        elif get_str(key) == 'N':
+#            for Hkey in NH.keys():
+#                if get_num(Hkey) == get_num(key):
+#                    HB_atm_pair[key] = Hkey
+#                    break
+#    
+##    print(Alip_C_BB)
+##    print(Alip_C_Exp)
+##    print(CO)
+##    print(HB_atm_pair)
+#
+#    NewLines = open(solv_PDB,'r').readlines()
+#    for n in range(0,index):        
+#        newsplit = NewLines[n].split()
+#        atmname = newsplit[2]
+#        atmcoor = [newsplit[6],newsplit[7],newsplit[8]]
+#        if get_str(newsplit[2]) in ['O' ,'N']:
+#            
+#            HB_atm[atmname] = HB_atm.pop(retrieve_key(HB_atm,atmcoor))
+#            #print(atmname,retrieve_key(HB_atm,atmcoor))
+#        if atmname[0] == 'C':
+#            if get_str(retrieve_key(CO,atmcoor)) != '':
+#                print(atmname,retrieve_key(CO,atmcoor))
+#                CO[atmname] = CO.pop(retrieve_key(CO,atmcoor))
+##            
+##            elif get_str(retrieve_key(Alip_C_BB,atmcoor)) != '':
+##                Alip_C_BB[atmname] = Alip_C_BB.pop(retrieve_key(Alip_C_BB,atmcoor))
+##            else:
+##                Alip_C_Exp[atmname] = Alip_C_Exp.pop(retrieve_key(Alip_C_Exp,atmcoor))
+##        if atmname[0] == 'H':
+##            NH[atmname] = NH.pop(retrieve_key(NH,atmcoor))
+#    
+#    print(Alip_C_BB)
+#    print(Alip_C_Exp)
+#    print(CO)
+#    print(NH)
+#    CA_list = {'backbone':[],'exposed':[]}
+#    for BBkey in Alip_C_BB.keys():
+#        CA_list['backbone'].append(BBkey)
+#    for Expkey in Alip_C_Exp.keys():
+#        CA_list['exposed'].append(Expkey)
+#    print(CA_list)
+#    
+    
 def permutation(limitations:list,change_range:dict):#lim_idx:[start,end]
     #input test
     step ={0:1,1:1,2:1,3:0.1}#The HP/HB atm limit must be int, will define expoential coef later
@@ -131,7 +226,7 @@ def permutation(limitations:list,change_range:dict):#lim_idx:[start,end]
         
 
     
-def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,HP_lim_ep = 7, Wat_HB_lim = 3, HP_Crit = 3.5, HB_Crit = 3,HP_Falloff = 0.8, HB_Falloff = 0.6):
+def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,HP_lim_ep = 8, Wat_HB_lim = 3, HP_Crit = 3.5, HB_Crit = 3,HP_Falloff = 0.8, HB_Falloff = 0.6):
     #HB_atm_pair and CA_list stored within a class    
     for file in os.listdir(sub_folder):
         if file.endswith(keyword) and 'Prot' not in file:
@@ -145,7 +240,7 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
                     try:
                         residue[split[2]] = [float(split[6]),float(split[7]),float(split[8])]
                     except:
-                        print('Error occurred at {}. \n Line as shown: {}'.format(file, atm))
+                        #print('Error occurred at {}. \n Line as shown: {}'.format(file, atm))
                         pass
             
             #print(residue)
@@ -166,6 +261,7 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
                 for keys in wat.keys():
                     if HP_HB_Interaction(residue[atm],wat[keys],HP_Crit, HP_Falloff):
                         HP[atm].extend([keys, HP_HB_Interaction(residue[atm],wat[keys],HP_Crit,HP_Falloff)])
+                        
                 if HP[atm] == []:
                     del HP[atm]
                 
@@ -179,27 +275,21 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
                     Intra_Crit = Intra_HB_Crit(HB_atm[l],HB_atm[n])
                     if  Intra_Crit == '0':
                         if OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]]):
-                                O_clash[HB_atm[l]] = [HB_atm[n],OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]])]
+                            O_clash[HB_atm[l]] = [HB_atm[n],OO_Clash(residue[HB_atm[l]], residue[HB_atm[n]])]
                         continue
-                    if HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,HB_Falloff):
+                    elif HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,HB_Falloff):
                         
-                        if  Intra_Crit == 'x':#l is N, n can be both
-                            try:
-                                vec_1 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[l]])
+                        if Intra_Crit == '1':#l is N, n can be both
+                            vec_1 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[l]])                        
+                            vec_2 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[n]])                        
+                            Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,HB_Falloff),Intra_HB_Geo(vec_1,vec_2)])
                             
-                                vec_2 = np.array(residue[struc.HB_pair[HB_atm[l]]])-np.array(residue[HB_atm[n]])
-                            
-                                Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,,HB_Falloff),Intra_HB_Geo(vec_1,vec_2)])
-                            except:
-                                print('Problem occurred with fetching intra HB!\n')
 #                        #l is O, n is N
                         elif  Intra_Crit == '2':
                             vec1 = np.array(residue[struc.HB_pair[HB_atm[n]]])-np.array(residue[HB_atm[n]])
                             vec2 = np.array(residue[struc.HB_pair[HB_atm[n]]])-np.array(residue[HB_atm[l]])
-                            Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,,HB_Falloff),Intra_HB_Geo(vec1,vec2)]) 
+                            Intra_HB[HB_atm[l]].extend([HB_atm[n],HP_HB_Interaction(residue[HB_atm[l]], residue[HB_atm[n]], HB_Crit,HB_Falloff),Intra_HB_Geo(vec1,vec2)]) 
                         
-    #                            except:
-#                                print('Error at {} and {}'.format(HB_atm[l],HB_atm[n]))
                 if Intra_HB[HB_atm[l]] == []:
                     del Intra_HB[HB_atm[l]]
             #print(Intra_HB)            
@@ -220,28 +310,50 @@ def get_report(struc,sub_folder,keyword = 'Lig_Only_3_layers.pdb',HP_lim_bb =4,H
             score = {'Stability':0,'HP_Ct':0,'HB_Ct':0,'Intra_HBct':0,'O_clash':0}
             penalty_atm ={}
             for keys,values in Wat_HB.items():
-                score['HB_Ct'] += min((len(values)/2),Wat_HB_lim)
+                temp = 0
+                
+                for n in range(0,int(len(values)/2)):
+                    temp += (HB_Crit/float(values[2*n +1]))**2
+                score['HB_Ct'] += min(temp,Wat_HB_lim)
+#                except:
+#                    print(keys, values)
+#                    return 0
+#                score['HB_Ct'] += min((len(values)/2),Wat_HB_lim)
                 if len(values) < (2*Wat_HB_lim):
-                    penalty_atm[keys] =  Wat_HB_lim - (len(values)/2)
+                    penalty_atm[keys] =  Wat_HB_lim -temp
+                    #penalty_atm[keys] =  Wat_HB_lim - (len(values)/2)
             #Can be modified for different structure
+            
+            
             for keys,values in HP.items():
                 if keys in struc.CA['backbone']:
-                    score['HP_Ct'] += min((len(values)/2),HP_lim_bb)
+                    HP_temp = 0
+                    for h in range(0,int(len(values)/2)):
+                        HP_temp += (HP_Crit/float(values[2*h +1]))**2
+                    score['HP_Ct'] += min(HP_temp,HP_lim_bb)
+                    #score['HP_Ct'] += min((len(values)/2),HP_lim_bb)
                 if keys in struc.CA['exposed']:   
-                    score['HP_Ct'] += min((len(values)/2),HP_lim_ep)
+                    HP_temp2 =0
+                    for v in range(0,int(len(values)/2)):
+                        HP_temp2 += (HP_Crit/float(values[2*v +1]))**2
+                    score['HP_Ct'] += min(HP_temp2,HP_lim_ep)
+                    #score['HP_Ct'] += min((len(values)/2),HP_lim_ep)
             for keys,values in Intra_HB.items():
+                #We need to debug the intra_HB calculation and add a stability bonus for each GOOD
+                #intraHB. 
                 score['Intra_HBct'] += (len(values)/3)
+                score['Stability'] -= (len(values)/3)
                 for atm in list(penalty_atm.keys()):
                     if keys == atm:
                         del penalty_atm[atm]
                     elif atm in values:
                         del penalty_atm[atm]        
             
-            for values in O_clash.items():
+            for O_values in O_clash.values():
+                for l in range(0,int(len(O_values)/2)):
+                    score['Stability'] += (3/float(O_values[2*l +1]))**2
                 
-                score['Stability'] += (len(values)/2)*3
-                
-                score['O_clash'] += (len(values)/2)
+                score['O_clash'] += (len(O_values)/2)
                 
             for each in penalty_atm.values():
                 score['Stability'] += each
@@ -265,6 +377,14 @@ def output_report(struc, keyword = 'Pose', output_name = 'Primitive Water Report
         writer.writeheader()
         
         emptyCt = []
+    
+    HB_header = list(struc.HB_pair.keys())
+    HB_all = {}
+    for each in HB_header:
+        HB_all[each] ={}
+        for atm in HB_header:
+            HB_all[each][atm] = 0
+            
     for pose in os.listdir(struc.Master_folder):
         if pose.startswith(keyword):
             if os.stat(pose+'\\'+ pose +'_Lig_Only_3_layers.pdb').st_size != 0:            
@@ -273,12 +393,21 @@ def output_report(struc, keyword = 'Pose', output_name = 'Primitive Water Report
                 except Exception as e:
                     print('File {} not processed!\n'.format(pose))
                     print(e)
-                    #continue
-                    return 0 
+                    continue
+
             else:
                 emptyCt.append(pose)
                 continue
-#            HPct, Intra_HBct, Wat_HBct, O_clashct =0,0,0,0
+
+            
+            #Count all HB
+            for donor,accept in Intra_HB.items():
+                try:
+                    HB_all[donor][accept[0]] += 1
+                except Exception as e:
+                    print(e)
+                    
+            
             
             
             output = open(os.path.join(pose,output_name),'w')
@@ -310,8 +439,6 @@ def output_report(struc, keyword = 'Pose', output_name = 'Primitive Water Report
                 output.write('\n')
                 
                 
-            
-                        
                 
             output.writelines('Intramolecular Oxygen clash as shown:\n')
             output.writelines('O1\tO2\tdist\n')
@@ -323,9 +450,6 @@ def output_report(struc, keyword = 'Pose', output_name = 'Primitive Water Report
                 
 
             #print('Current score:',score['Stability'])
-            
-                
-            
             output.writelines("Total number of HP interactions: {}\n".format(score['HP_Ct']))
             output.writelines("Total number of intramolecular HB interactions: {}\n".format(score['Intra_HBct']))
             output.writelines("Total number of peptide-water HB interactions: {}\n".format(score['HB_Ct']))
@@ -359,7 +483,40 @@ def output_report(struc, keyword = 'Pose', output_name = 'Primitive Water Report
             emptyFi.writelines(emp+'\n')
         emptyFi.close()
     
+    #Get a heatmap(triangular) now
+    dataset = []
+    for line in HB_all.values():
+        temp = []
+        for instance in line.values():
+            temp.append(instance)
+        dataset.append(temp)    
+    mask =  np.tri(len(HB_header), k=-1)
+    print(mask)
+    A = np.ma.array(dataset, mask=mask) 
+    print(A)
+    fig = PLT.figure()
+    ax1 = fig.add_subplot(111)
+    cmap = CM.get_cmap('coolwarm', 10) # jet doesn't have white color
+    cmap.set_bad('w') # default value is 'k'
+    img = ax1.imshow(A, interpolation="nearest", cmap=cmap)
+    ax1.set_xticks(np.arange(len(HB_header)))
+    ax1.set_yticks(np.arange(len(HB_header)))
+    ax1.set_xticklabels(HB_header)
+    ax1.set_yticklabels(HB_header)
+    b, t = PLT.ylim() # discover the values for bottom and top
+    b += 0.5 # Add 0.5 to the bottom
+    t -= 0.5 # Subtract 0.5 from the top
+    PLT.ylim(b, t) # update the ylim(bottom, top) values
+     # ta-da!
+    ax1.grid(True)
 
+    PLT.colorbar(img,label="HB Count", orientation="vertical",shrink = 0.5)
+    PLT.rcParams["figure.figsize"] = (7,7)
+    PLT.show()
+    new_heatmap = sns.heatmap(A, mask=mask, cmap=cmap, center=0,xticklabels=HB_header, yticklabels=HB_header,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+    new_heatmap.set(ylim=(b, t))
+    
 def graph_output(struc,lims,keyword = 'Pose'): #graph multiple results with different interaction lims and exp factorials, so we can predict logP with those parameters. 
     os.chdir(struc.Master_folder)
     
@@ -404,7 +561,7 @@ def graph_output(struc,lims,keyword = 'Pose'): #graph multiple results with diff
                                 Log_HP = math.log10(abs(HP_para))
                         else:
                             Log_HP = 0
-                            
+                        Log_HP = Log_HP*3 -1     
                         HP_Tol[n][pose] = [population, Log_HP]
                         if score['Stability'] <= 10:
                             ea_distri[score['Stability']] += 1   
@@ -427,7 +584,6 @@ def graph_output(struc,lims,keyword = 'Pose'): #graph multiple results with diff
 #    print(HP_Tol)
     print(P_coef)
     for n in HP_Tol.keys():
-        print(n)
         logP_Tol = 0
         for conf in HP_Tol[n].values():
             each = conf[0] *conf[1]/P_coef[n]
@@ -460,4 +616,8 @@ def graph_output(struc,lims,keyword = 'Pose'): #graph multiple results with diff
 #    plt.show()
 #        
 
-    
+#Testing block here
+#if __name__ == '__main__':
+#    pre_add = 'C:\\People\Kaichen\\PEPEDIT\\A6-2NMe_2DAA\\poses_m\\out000001m.pdb'
+#    solv_add = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-2NMe_2DAA\\Pose_1\\Pose_1_compare_waters.pdb'
+#    trace_rename_atm(pre_add,solv_add)    
