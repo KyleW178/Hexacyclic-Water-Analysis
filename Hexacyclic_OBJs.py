@@ -19,10 +19,16 @@ starttime = str(datetime.datetime.now(pytz.timezone('America/Los_Angeles')))[0:1
 #============================
 #Organize related data based on each structure
 class structure():
-    def __init__(self,folder:str,CA_list:dict,HB_pair:dict):
+    def __init__(self,folder:str = '',CA_list:dict = {},HB_pair:dict = {}):
         self.Master_folder = folder
         self.CA = CA_list
         self.HB_pair = HB_pair
+#Zmat
+    def atm_name_conv(self,origin_PDB:str = ''):
+        #Open a pdb from PEPEDIT or other results and check the CA list/HB atm list is right
+        
+        pass
+
 
 Main_folder = "C:\\People\\Kaichen\\cycGGGGGG\\"
 AllG6 ='C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\ALL_G6'
@@ -49,12 +55,13 @@ ALL_A6_1_3_4_6NMe = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\
 A6_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1DAA'
 ALL_A6_1NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1NMe_1DAA'
 ALL_A6_1_5NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,5NMe_1DAA'
-ALL_A6_1_2_5NMe_1DAA = ''
+ALL_A6_1_2_5NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,2,5NMe_1DAA'
 ALL_A6_1_4_5NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,4,5NMe_1DAA'
 ALL_A6_1_2_4_5NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,2,4,5NMe_1DAA'
 
 
 ALL_A6_1_6NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1_6NMe_1DAA'
+ALL_A6_1_3_6NMe_1DAA ='C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,3,6NMe_1DAA'
 ALL_A6_1_4_6NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,4,6NMe_1DAA'
 ALL_A6_1_3_4_6NMe_1DAA = 'C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\A6-1,3,4,6NMe_1DAA'
 
@@ -87,7 +94,8 @@ HB_atm_pair_A6 = {'O01':'C01','O02':'C04','O03':'C08','O04':'C11','O05':'C14','O
                'N01':'H01','N02':'H02','N03':'H03','N04':'H04','N05':'H05','N06':'H06'}
 HB_atm_pair_V6 = {'O01':'C01','O02':'C06','O03':'C12','O04':'C17','O05':'C22','O06':'C27',
                'N01':'H01','N02':'H02','N03':'H03','N04':'H04','N05':'H05','N06':'H06'}
-HB_atm_pair_1NMe = {'O01':'C01','O02':'C05','O03':'C06','O04':'C08','O05':'C10','O06':'C12',
+
+HB_atm_pair_1NMe = {'O01':'C01','O02':'C05','O03':'C09','O04':'C12','O05':'C15','O06':'C18',
                'N02':'H01','N03':'H02','N04':'H03','N05':'H04','N06':'H05'}
 
 HB_atm_pair_1_5NMe ={'O01':'C01','O02':'C05','O03':'C09','O04':'C12','O05':'C15','O06':'C19',
@@ -111,6 +119,11 @@ HB_atm_pair_1_2_4_5NMe ={'O01':'C01','O02':'C05','O03':'C10','O04':'C13','O05':'
 #DAA
 HB_atm_pair_1_6NMe_1DAA = {'O01':'C01','O02':'C05','O03':'C09','O04':'C12','O05':'C15','O06':'C18',
                'N02':'H01','N03':'H02','N04':'H03','N05':'H04'}
+#
+#HB_atm_pair_2NMe = {'O01':'C01','O02':'C04','O03':'C06','O04':'C08','O05':'C10','O06':'C12',
+#               'N01':'H01','N03':'H02','N04':'H03','N05':'H04','N06':'H05'}
+
+
 #=========================
 G6 = structure(AllG6,CA_G6,HB_atm_pair_G6)
 A6 = structure(AllA6,CA_A6,HB_atm_pair_A6)
@@ -129,12 +142,19 @@ A6_1_4_6NMe = structure(ALL_A6_1_4_6NMe,CA_A6_1_4_6NMe,HB_atm_pair_1_4_6NMe)
 aA5 = structure(A6_1DAA,CA_A6,HB_atm_pair_A6)
 A6_1NMe_1DAA = structure(ALL_A6_1NMe_1DAA,CA_A6_1NMe,HB_atm_pair_1NMe)
 A6_1_5NMe_1DAA = structure(ALL_A6_1_5NMe_1DAA,CA_A6_1_5NMe,HB_atm_pair_1_5NMe)
+A6_1_2_5NMe_1DAA = structure(ALL_A6_1_2_5NMe_1DAA,CA_A6_1_2_5NMe,HB_atm_pair_1_2_5NMe)
 A6_1_4_5NMe_1DAA = structure(ALL_A6_1_4_5NMe_1DAA,CA_A6_1_4_5NMe,HB_atm_pair_1_4_5NMe)
 A6_1_2_4_5NMe_1DAA = structure(ALL_A6_1_2_4_5NMe_1DAA,CA_A6_1_2_4_5NMe,HB_atm_pair_1_2_4_5NMe)
 
 A6_1_6NMe_1DAA = structure(ALL_A6_1_6NMe_1DAA,CA_A6_1_6NMe_1DAA,HB_atm_pair_1_6NMe_1DAA)
+A6_1_3_6NMe_1DAA = structure(ALL_A6_1_3_6NMe_1DAA,CA_A6_1_3_6NMe,HB_atm_pair_1_3_6NMe)
 A6_1_4_6NMe_1DAA =structure(ALL_A6_1_4_6NMe_1DAA,CA_A6_1_4_6NMe,HB_atm_pair_1_4_6NMe)
 A6_1_3_4_6NMe_1DAA = structure(ALL_A6_1_3_4_6NMe_1DAA,CA_A6_1_3_4_6NMe,HB_atm_pair_1_3_4_6NMe)
+
+#1DAA-NMe rotation
+#A6_2NMe_2DAA = structure(ALL_A6_2NMe_2DAA,CA_A6_2NMe,HB_atm_pair_2NMe)
+
+
 #===========================
 
 
@@ -144,18 +164,15 @@ A6_1_3_4_6NMe_1DAA = structure(ALL_A6_1_3_4_6NMe_1DAA,CA_A6_1_3_4_6NMe,HB_atm_pa
 
                     
 if __name__ == '__main__':
-    #print(get_report(test))
-    #k1,k2,k3 = get_report(random)  
-    
-    #output_report(AllA6,opt = 'csv')
-    
-    #print(get_report("C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\debug_test\\Pose_3381"))
-    
-    
-    #output_report(A6,opt = 'csv')
+#        
+#    #print(get_report("C:\\Users\\Haworth_Lab2\\Desktop\\Solvate\\Solvate\\Inputs\\debug_test\\Pose_3381"))
+#    
+#    
+#    output_report(A6_1_5NMe_1DAA,opt = 'csv',graph = 'N')
+    #print(get_report(A6,debug+'\\Pose_1010'))
+
 
     new_lims = permutation([4,8,4,0.05],{1:[6,8],2:[3,4]})
-    #new_lims = [[4,7,3,0.05],[4,8,3,0.05]]
-    print(new_lims)
-    graph_output(A6_1_3_4_6NMe_1DAA,new_lims)
+
+    graph_output(A6,new_lims)
     
