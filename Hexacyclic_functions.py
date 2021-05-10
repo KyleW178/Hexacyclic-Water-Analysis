@@ -17,8 +17,6 @@ class HP_Interaction():
         self.object = []
         pass
 
-
-
 def aliphatic_C(carbon):
     if carbon[2][0] == 'C' and len(carbon[2]) > 1:
         return True
@@ -61,12 +59,6 @@ def HP_HB_Interaction(coo1,coo2,crit,falloff):#For crit =3.5(HP), falloff 0.7. C
     else:
         return False
 
-#def HP_HB_Interaction(coo1,coo2,crit):
-#    distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
-#    if distance <= crit:#HP crit 3.5, HB crit 3
-#        return str(round(distance, 3))
-#    else:
-#        return False
 
 #Name: N01, O04, so on
 #Consider: regular+ O-O clash(return 0)
