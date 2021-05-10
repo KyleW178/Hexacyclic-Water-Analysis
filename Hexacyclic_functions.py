@@ -44,15 +44,6 @@ def OO_Clash(c1,c2,crit = 4):
     else:
         return False
 
-#Why this falloff design doesnot work???
-#def HP_HB_Interaction(coo1,coo2,crit):
-#    distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
-#    falloff = 0.7
-#    if (crit - falloff)<= distance <= (crit + falloff):#HP crit 3.5, HB crit 3
-#        return str(round(distance, 3))
-#    else:
-#        return False
-
 def HP_HB_Interaction(coo1,coo2,crit):
     distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
     if distance <= crit:#HP crit 3.5, HB crit 3
