@@ -5,11 +5,6 @@ import matplotlib.pyplot as plt
 import datetime
 #import freesasa
         
-class HP_Interaction():
-    def __init__(self):
-        self.Carb = ''
-        self.object = []
-        pass
 
 
 
@@ -46,15 +41,6 @@ def HP_HB_Interaction(coo1,coo2,crit):
     else:
         return False
 
-#def HP_HB_Interaction(coo1,coo2,crit,falloff):#For crit =3.5(HP), falloff 0.7. Crit 3.0(HB), falloff 0.5 or other values of the same ratio
-#    distance = math.sqrt((coo1[0]-coo2[0])**2 + (coo1[1]-coo2[1])**2 + (coo1[2]-coo2[2])**2)
-#    if (crit - falloff*2)<= distance  and distance <= (crit + falloff):#HP crit 3.5, HB crit 3
-#    #if distance <= (crit + falloff):
-#        return str(round(distance, 3))
-#    else:
-#        return False
-#Name: N01, O04, so on
-#Please make a new one... this does not work
 #Consider: regular+ O-O clash(return 0)
 def Intra_HB_Crit(name1, name2, aa = 6):
     a, b = get_num(name1), get_num(name2)
@@ -445,12 +431,7 @@ def fixvar_compare(fixvar1, fixvar2):
                 equals['Pose_'+str(g-2)] = 'Pose_'+str(n-2)
                 k = g
                 continue
-#        if temp == k:#Match not found, try increase the range
-#            for g2 in range(max(4,k-40 - edge), min(k+40 + edge,len(file1)-1)):
-#                if file2[n] == file1[g2]:
-#                    equals['Pose_'+str(n-3)] = 'Pose_'+str(g2-3)
-#                    k = g2
-#                    break
+
     print(n,g,k)
          
     return equals
